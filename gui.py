@@ -15,6 +15,9 @@ from PIL import Image, ImageTk
 import json
 import webbrowser
 import wikipedia
+import openai
+
+openai.api_key = "your_openai_api_key"
 
 brain_file = "Brain.json"
 try:
@@ -64,17 +67,29 @@ def speak(audio):
     type_text(f"Assistant: {audio}\n\n")
     os.system(f'say -r 185 "{audio}"')  # macOS-specific command
 
-# Function to handle voice recognition
+
+# Function to handle voice recognition with GPT integration
 def recognize():
     reco = sr.Recognizer()
     with sr.Microphone() as source:
         type_text("Listening...\n\n")
         reco.pause_threshold = 1
         try:
-            audio = reco.listen(source, timeout=2, phrase_time_limit=3)
+            audio = reco.listen(source, timeout=5, phrase_time_limit=5)
             query = reco.recognize_google(audio, language='en-in').lower()
             output_text.insert(tk.END, f"You: {query}\n\n")  # Display user input with spacing
-            return query
+
+            # Use GPT for more complex understanding and response
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=f"Respond to this query as an intelligent assistant: {query}",
+                max_tokens=150
+            )
+
+            gpt_response = response.choices[0].text.strip()
+            speak(gpt_response)
+            return gpt_response
+
         except sr.UnknownValueError:
             speak("Sorry, I did not understand. Can you please repeat?")
         except sr.RequestError:
@@ -308,9 +323,7 @@ def clear_output():
 def execute_assistant():
     query = recognize()
 
-    if query == 'calculate':
-        calculator()
-    elif 'weather' in query:
+    if 'weather' in query:
         get_weather()
     elif 'reminder' in query:
         set_reminder()
@@ -328,15 +341,17 @@ def execute_assistant():
         search_wikipedia()
     elif 'news' in query:
         get_news()
-        successful = True
     elif 'stock' in query:
         get_stock_price()
-        successful = True
     else:
-        speak("Sorry, I didn't understand that command.")
-    
-    # Clear the output after 3 successful commands
-    clear_output()
+        # Let GPT handle more complex or unrecognized commands
+        speak("Let me think...")
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=f"Respond intelligently to this command: {query}",
+            max_tokens=150
+        )
+        speak(response.choices[0].text.strip())
 
 # Start the assistant with the wish function
 wish()
