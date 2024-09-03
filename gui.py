@@ -26,18 +26,15 @@ try:
 except FileNotFoundError:
     brain_data = {}
 
-# Save to Brain.json
 def save_to_brain():
     with open(brain_file, "w") as file:
         json.dump(brain_data, file, indent=4)
 
-# Initialize GUI
 root = tk.Tk()
 root.title("Advanced AI Voice Assistant")
 root.geometry("700x600")
 root.configure(bg="#2c3e50")
 
-# Load and set the icon
 try:
     icon_image = Image.open("assistant_icon.png")  # Replace with your icon file path
     icon = ImageTk.PhotoImage(icon_image)
@@ -67,7 +64,6 @@ def speak(audio):
     type_text(f"Assistant: {audio}\n\n")
     os.system(f'say -r 185 "{audio}"')  # macOS-specific command
 
-
 # Function to handle voice recognition with GPT integration
 def recognize():
     reco = sr.Recognizer()
@@ -88,7 +84,7 @@ def recognize():
 
             gpt_response = response.choices[0].text.strip()
             speak(gpt_response)
-            return gpt_response
+            return query
 
         except sr.UnknownValueError:
             speak("Sorry, I did not understand. Can you please repeat?")
@@ -111,8 +107,8 @@ def wish():
 
 # Weather Information
 def get_weather():
-    api_key = 'a6c2ac70c7249be4d5364b3cc9e41229'
-    location = 'madurai'  # Replace with your location
+    api_key = 'your_weather_api_key'
+    location = 'your_location'  # Replace with your location
     try:
         response = get(f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}')
         data = response.json()
@@ -135,9 +131,6 @@ def set_reminder():
     speak('When should I remind you? Please specify the time in minutes.')
     try:
         minutes = int(recognize())
-        if minutes == 'none':
-            speak('No time specified.')
-            return
         speak(f'Reminder set for {minutes} minutes. I will notify you then.')
         time.sleep(minutes * 60)
         speak(f'Reminder: {reminder}')
@@ -164,8 +157,8 @@ def send_email():
         speak('No body specified.')
         return
 
-    sender = 'sivabhuvan20_bai25@mepcoeng.ac.in'
-    password = 'Sivamalar2221'
+    sender = 'sender_mail_id'
+    password = 'sender_mail_id_password'
 
     msg = MIMEText(body)
     msg['Subject'] = subject
@@ -243,54 +236,16 @@ def tell_joke():
     joke = pyjokes.get_joke()
     speak(joke)
 
-# Simple calculator
-def calculator():
-    speak('Please tell me the arithmetic operation you want to perform.')
-    operation = recognize()
-    if operation == 'none':
-        speak('No operation specified.')
-        return
-
+# Get IP address
+def get_ip():
     try:
-        result = eval(operation)
-        speak(f'The result of {operation} is {result}')
+        ip_address = get('https://api64.ipify.org').text
+        speak(f'Your IP address is {ip_address}')
     except Exception as e:
-        speak(f'Sorry, I could not perform the calculation. Error: {e}')
-
-# Open web browser with specific URL
-def open_website():
-    speak('Which website would you like to open?')
-    website = recognize()
-    if website == 'none':
-        speak('No website specified.')
-        return
-
-    try:
-        webbrowser.open(f'https://{website}')
-        speak(f'Opening {website}')
-    except Exception as e:
-        speak(f'Sorry, I could not open the website. Error: {e}')
-
-# Wikipedia Search
-def search_wikipedia():
-    speak('What do you want to search on Wikipedia?')
-    query = recognize()
-    if query == 'none':
-        speak('No query provided.')
-        return
-
-    try:
-        summary = wikipedia.summary(query, sentences=2)
-        speak(summary)
-    except wikipedia.exceptions.DisambiguationError as e:
-        speak(f'There are multiple results for {query}. Please be more specific.')
-    except wikipedia.exceptions.PageError:
-        speak(f'Sorry, I could not find a page for {query}.')
-    except Exception as e:
-        speak(f'Sorry, something went wrong. {e}')
-
+        speak(f'Sorry, I could not retrieve your IP address. {e}')
+        
 def get_news():
-    api_key = '5290942623304f37b8ae6d4f22c81a76'  # Replace with your News API key
+    api_key = 'your_news_api_key'  # Replace with your News API key
     url = f'https://newsapi.org/v2/top-headlines?country=in&apiKey={api_key}'
     try:
         response = requests.get(url)
@@ -308,57 +263,49 @@ def get_stock_price():
     if symbol == 'none':
         speak('No symbol provided.')
         return
-
+    api_key = 'your_stock_api_key'
     try:
-        stock_price = get(f'https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=your_api_key').json()[0]['price']
+        stock_price = get(f'https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey={api_key}').json()[0]['price']
         speak(f'The current price of {symbol} is {stock_price} USD')
     except Exception as e:
         speak(f'Sorry, I could not fetch the stock price. Error: {e}')
 
-# Clear the output
-def clear_output():
-    output_text.delete(1.0, tk.END)
+# Exit assistant
+def exit_assistant():
+    speak("Goodbye, have a great day!")
+    root.quit()
 
-# Execute the assistant commands
-def execute_assistant():
-    query = recognize()
-
-    if 'weather' in query:
-        get_weather()
-    elif 'reminder' in query:
-        set_reminder()
-    elif 'email' in query:
-        send_email()
-    elif 'translate' in query:
-        translate_text()
-    elif 'joke' in query:
-        tell_joke()
-    elif 'music' in query:
+# Button command function to handle various commands
+def execute_assistant(command=None):
+    if not command:
+        command = recognize()
+    if 'play music' in command:
         play_music()
-    elif 'website' in query:
-        open_website()
-    elif 'wikipedia' in query:
-        search_wikipedia()
-    elif 'news' in query:
+    elif 'send email' in command:
+        send_email()
+    elif 'set reminder' in command:
+        set_reminder()
+    elif 'get weather' in command:
+        get_weather()
+    elif 'get news' in command:
         get_news()
-    elif 'stock' in query:
-        get_stock_price()
+    elif 'tell me a joke' in command:
+        tell_joke()
+    elif 'get ip' in command:
+        get_ip()
+    elif 'translate' in command:
+        translate_text()
+    elif 'exit' in command:
+        exit_assistant()
     else:
-        # Let GPT handle more complex or unrecognized commands
-        speak("Let me think...")
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"Respond intelligently to this command: {query}",
-            max_tokens=150
-        )
-        speak(response.choices[0].text.strip())
+        speak("I'm sorry, I didn't understand that command.")
 
-# Start the assistant with the wish function
+# Voice Input Button
+voice_input_button = tk.Button(root, text="Speak", command=lambda: execute_assistant(), font=("Helvetica", 16), bg="#3498db", fg="#ecf0f1")
+voice_input_button.pack(pady=20)
+
+# Start the assistant
 wish()
-
-# Button to start listening
-listen_button = tk.Button(root, text="Listen", command=execute_assistant, font=("Helvetica", 16, "bold"), bg="#2980b9", fg="#ecf0f1", activebackground="#3498db", activeforeground="#ecf0f1")
-listen_button.pack(pady=20)
 
 # Run the GUI loop
 root.mainloop()
