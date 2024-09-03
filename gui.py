@@ -289,6 +289,8 @@ def execute_assistant(command=None):
         get_weather()
     elif 'get news' in command:
         get_news()
+    elif 'get stock price' in command:
+        get_stock_price()
     elif 'tell me a joke' in command:
         tell_joke()
     elif 'get ip' in command:
