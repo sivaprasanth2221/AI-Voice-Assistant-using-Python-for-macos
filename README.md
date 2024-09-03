@@ -61,7 +61,8 @@ pip install pyttsx3 speechrecognition requests pywhatkit wikipedia scikit-learn 
     ```sh
     python gui.py
     ```
-## Use Voice Commands**:
+    
+**Use Voice Commands**:
 
  - "Play music" to play songs.
  - "Send email" to compose and send an email.
