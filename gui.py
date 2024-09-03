@@ -266,84 +266,43 @@ def search_wikipedia():
 
     try:
         summary = wikipedia.summary(query, sentences=2)
-        speak(summary)
-    except wikipedia.exceptions.DisambiguationError as e:
-        speak(f'There are multiple results for {query}. Please be more specific.')
-    except wikipedia.exceptions.PageError:
-        speak(f'Sorry, I could not find a page for {query}.')
+        speak(f'According to Wikipedia: {summary}')
+    except wikipedia.DisambiguationError as e:
+        speak(f'There are multiple entries for {query}. Can you please be more specific?')
+    except wikipedia.PageError:
+        speak(f'Sorry, I could not find any information on {query}.')
     except Exception as e:
         speak(f'Sorry, something went wrong. {e}')
 
-def get_news():
-    api_key = '5290942623304f37b8ae6d4f22c81a76'  # Replace with your News API key
-    url = f'https://newsapi.org/v2/top-headlines?country=in&apiKey={api_key}'
-    try:
-        response = requests.get(url)
-        news_data = response.json()
-        headlines = [article['title'] for article in news_data['articles'][:5]]
-        speak("Here are the top headlines:")
-        for i, headline in enumerate(headlines, 1):
-            speak(f"{i}. {headline}")
-    except Exception as e:
-        speak(f'Sorry, I could not fetch the news. Error: {e}')
-        
-def get_stock_price():
-    speak('Please tell me the stock symbol.')
-    symbol = recognize()
-    if symbol == 'none':
-        speak('No symbol provided.')
-        return
-
-    try:
-        stock_price = get(f'https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey=your_api_key').json()[0]['price']
-        speak(f'The current price of {symbol} is {stock_price} USD')
-    except Exception as e:
-        speak(f'Sorry, I could not fetch the stock price. Error: {e}')
-
-# Clear the output
-def clear_output():
-    output_text.delete(1.0, tk.END)
-
-# Execute the assistant commands
-def execute_assistant():
-    query = recognize()
-
-    if query == 'calculate':
-        calculator()
-    elif 'weather' in query:
+# Function to respond to user commands
+def respond_to_command(command):
+    command = command.lower()
+    if 'weather' in command:
         get_weather()
-    elif 'reminder' in query:
+    elif 'reminder' in command:
         set_reminder()
-    elif 'email' in query:
+    elif 'email' in command:
         send_email()
-    elif 'translate' in query:
+    elif 'translate' in command:
         translate_text()
-    elif 'joke' in query:
-        tell_joke()
-    elif 'music' in query:
+    elif 'music' in command:
         play_music()
-    elif 'website' in query:
+    elif 'joke' in command:
+        tell_joke()
+    elif 'calculate' in command:
+        calculator()
+    elif 'open' in command and 'website' in command:
         open_website()
-    elif 'wikipedia' in query:
+    elif 'wikipedia' in command or 'search' in command:
         search_wikipedia()
-    elif 'news' in query:
-        get_news()
-        successful = True
-    elif 'stock' in query:
-        get_stock_price()
-        successful = True
     else:
-        speak("Sorry, I didn't understand that command.")
-    
-    # Clear the output after 3 successful commands
-    clear_output()
+        speak("Sorry, I didn't understand the command.")
 
-# Start the assistant with the wish function
-wish()
-
-# Button to start listening
-listen_button = tk.Button(root, text="Listen", command=execute_assistant, font=("Helvetica", 16, "bold"), bg="#2980b9", fg="#ecf0f1", activebackground="#3498db", activeforeground="#ecf0f1")
+# Listen button
+listen_button = tk.Button(root, text="Listen", font=("Helvetica", 18, "bold"), bg="#e74c3c", fg="#ecf0f1", command=lambda: respond_to_command(recognize()))
 listen_button.pack(pady=20)
 
-# Run the GUI loop
+# Initial wish
+wish()
+
 root.mainloop()
