@@ -1,6 +1,6 @@
 # Das - Personal Voice Assistant
 
-Das is a personal voice assistant built using Python. It can recognize and respond to voice commands, perform various tasks such as opening applications, playing songs on YouTube, fetching the current time, and searching the internet. Das can also learn new phrases and responses, making it more interactive and useful over time.
+Das is a personal voice assistant built using Python for macOS. It can recognize and respond to voice commands, perform various tasks such as opening applications, playing songs on YouTube, fetching the current time, and searching the internet. Das can also learn new phrases and responses, making it more interactive and useful over time.
 
 ## Features
 
